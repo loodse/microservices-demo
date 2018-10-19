@@ -15,49 +15,43 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: adservice
+  name: currencyservice
 spec:
   template:
     metadata:
       labels:
-        app: adservice
+        app: currencyservice
     spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/adservice
+        image: gcr.io/loodse-sc-test/currencyservice
         ports:
-        - containerPort: 9555
-        env:
-        - name: PORT
-          value: "9555"
+        - name: grpc
+          containerPort: 7000
+        readinessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+        livenessProbe:
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:7000"]
         resources:
           requests:
-            cpu: 200m
-            memory: 180Mi
+            cpu: 100m
+            memory: 64Mi
           limits:
-            cpu: 300m
-            memory: 300Mi
-        readinessProbe:
-          tcpSocket:
-            port: 9555
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        livenessProbe:
-          tcpSocket:
-            port: 9555
-          initialDelaySeconds: 10
-          periodSeconds: 10
+            cpu: 200m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: adservice
+  name: currencyservice
 spec:
   type: ClusterIP
   selector:
-    app: adservice
+    app: currencyservice
   ports:
   - name: grpc
-    port: 9555
-    targetPort: 9555
+    port: 7000
+    targetPort: 7000

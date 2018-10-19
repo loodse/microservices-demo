@@ -15,44 +15,49 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: paymentservice
+  name: adservice
 spec:
   template:
     metadata:
       labels:
-        app: paymentservice
+        app: adservice
     spec:
       terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/paymentservice
+        image: gcr.io/loodse-sc-test/adservice
         ports:
-        - containerPort: 50051
-        readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 50051
-        livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 50051
+        - containerPort: 9555
+        env:
+        - name: PORT
+          value: "9555"
         resources:
           requests:
-            cpu: 100m
-            memory: 64Mi
-          limits:
             cpu: 200m
-            memory: 128Mi
+            memory: 180Mi
+          limits:
+            cpu: 300m
+            memory: 300Mi
+        readinessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+        livenessProbe:
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:9555"]
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: paymentservice
+  name: adservice
 spec:
   type: ClusterIP
   selector:
-    app: paymentservice
+    app: adservice
   ports:
   - name: grpc
-    port: 50051
-    targetPort: 50051
+    port: 9555
+    targetPort: 9555

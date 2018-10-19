@@ -15,26 +15,25 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: shippingservice
+  name: paymentservice
 spec:
   template:
     metadata:
       labels:
-        app: shippingservice
+        app: paymentservice
     spec:
+      terminationGracePeriodSeconds: 5
       containers:
       - name: server
-        image: gcr.io/microservices-demo-app/shippingservice
+        image: gcr.io/loodse-sc-test/paymentservice
         ports:
         - containerPort: 50051
         readinessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 50051
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
         livenessProbe:
-          periodSeconds: 5
-          tcpSocket:
-            port: 50051
+          exec:
+            command: ["/bin/grpc_health_probe", "-addr=:50051"]
         resources:
           requests:
             cpu: 100m
@@ -46,11 +45,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shippingservice
+  name: paymentservice
 spec:
   type: ClusterIP
   selector:
-    app: shippingservice
+    app: paymentservice
   ports:
   - name: grpc
     port: 50051
